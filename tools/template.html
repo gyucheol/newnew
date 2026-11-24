@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2027년 원유 공급 과잉 논제 검증</title>
+<style>
+:root{--bg:#f7f8fa;--card:#fff;--ink:#1c2430;--muted:#5d6878;--line:#e3e7ed;--navy:#1f3a5f;--s1:#2f6db5;--s2:#e08a2e;--s3:#3a9a6b;--s4:#8a5cc2;--s5:#c2475b;--neg:#c2475b}
+@media (prefers-color-scheme:dark){:root{--bg:#11151b;--card:#1a2029;--ink:#e6eaf0;--muted:#9aa5b4;--line:#2c3440;--navy:#9cc0ef;--s1:#5b9be0;--s2:#f0a453;--s3:#5cc08f;--s4:#ad86e0;--s5:#e57286;--neg:#e57286}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;line-height:1.7;font-size:16px}
+main{max-width:860px;margin:0 auto;padding:24px 16px 64px}
+h1{color:var(--navy);font-size:1.6rem;margin:.2em 0 .4em}
+h2{color:var(--navy);font-size:1.25rem;margin:2em 0 .6em;padding-top:.6em;border-top:2px solid var(--line)}
+h3{color:var(--navy);font-size:1.05rem;margin:1.4em 0 .4em}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+ol,ul{padding-left:1.4em}li{margin:.2em 0}
+a{color:var(--s1);word-break:break-all}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 14px 10px;margin:16px 0}
+figcaption{font-weight:600;color:var(--navy);margin-bottom:6px}
+.note{color:var(--muted);font-size:.9rem;margin:.4em 0 0}
+.chart{position:relative;width:100%}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-size:19px}
+.grid{stroke:var(--line);stroke-width:1}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem;color:var(--muted);margin:4px 0 6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:.8rem;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.15);display:none;white-space:nowrap;z-index:2}
+.disc{color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<main>
+{{BODY}}
+<p class="disc">투자 권유가 아닌 판단 기준입니다. 수치는 2026년 11월 24일까지 공개된 자료 기준이며, 추정치에는 본문에 추론 유형을 표시했습니다.</p>
+</main>
+<script>
+const D={{DATA}};
+const C=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const PAL=['--s1','--s2','--s3','--s4','--s5'];
+const NS='http://www.w3.org/2000/svg';
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+function nice(v){const p=Math.pow(10,Math.floor(Math.log10(Math.abs(v)||1)));const f=v/p;return (f<=1?1:f<=2?2:f<=5?5:10)*p}
+function frame(id,series,opt){
+  const box=document.getElementById(id);box.innerHTML='';
+  if(series.length>1){const lg=document.createElement('div');lg.className='legend';series.forEach((s,i)=>{lg.innerHTML+=`<span><i style="background:${C(PAL[i])}"></i>${s[0]}</span>`});box.appendChild(lg)}
+  const W=760,H=(opt.h||300)+60,m={l:70,r:30,t:12,b:opt.rot?100:40};
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img'},box);
+  const all=series.flatMap(s=>s[1]);let lo=Math.min(0,...all),hi=Math.max(...all);
+  const step=nice((hi-lo)/5);lo=Math.floor(lo/step)*step;hi=Math.ceil(hi/step)*step;
+  const y=v=>m.t+(H-m.t-m.b)*(1-(v-lo)/(hi-lo));
+  for(let v=lo;v<=hi+1e-9;v+=step){el('line',{x1:m.l,x2:W-m.r,y1:y(v),y2:y(v),class:'grid'},svg);el('text',{x:m.l-6,y:y(v)+4,'text-anchor':'end'},svg).textContent=Math.round(v).toLocaleString()}
+  const tip=document.createElement('div');tip.className='tip';box.appendChild(tip);
+  const show=(ev,html)=>{const r=box.getBoundingClientRect();tip.innerHTML=html;tip.style.display='block';let x=ev.clientX-r.left+10;if(x>r.width-150)x-=170;tip.style.left=x+'px';tip.style.top=(ev.clientY-r.top-10)+'px'};
+  const hide=()=>tip.style.display='none';
+  return {svg,W,H,m,y,show,hide};
+}
+function xlabels(f,xs,xc,rot){xs.forEach((t,i)=>{const tx=el('text',{x:xc(i),y:f.H-f.m.b+24,'text-anchor':rot?'end':'middle'},f.svg);if(rot)tx.setAttribute('transform',`rotate(-40 ${xc(i)} ${f.H-f.m.b+24})`);tx.textContent=t})}
+function bars(id,xs,series,opt={}){
+  const f=frame(id,series,opt);const n=xs.length,k=series.length,gw=(f.W-f.m.l-f.m.r)/n,bw=Math.max(4,(gw*.72)/k-2);
+  const xc=i=>f.m.l+gw*(i+.5);
+  series.forEach((s,j)=>s[1].forEach((v,i)=>{
+    const x=xc(i)-(k*(bw+2))/2+j*(bw+2),y0=f.y(0),y1=f.y(v);
+    const col=opt.sign&&v<0?C('--neg'):C(PAL[j]);
+    const r=el('rect',{x,y:Math.min(y0,y1),width:bw,height:Math.max(1,Math.abs(y1-y0)),rx:3,fill:col},f.svg);
+    const lab=opt.lab?opt.lab(i,j,v):`${xs[i]}<br>${s[0]}: ${v.toLocaleString()}`;
+    r.addEventListener('mousemove',e=>f.show(e,lab));r.addEventListener('mouseleave',f.hide);
+    r.addEventListener('touchstart',e=>f.show(e.touches[0],lab),{passive:true});
+  }));
+  el('line',{x1:f.m.l,x2:f.W-f.m.r,y1:f.y(0),y2:f.y(0),stroke:C('--muted')},f.svg);
+  xlabels(f,xs,xc,opt.rot);
+}
+function lines(id,xs,series,opt={}){
+  const f=frame(id,series,opt);const n=xs.length,xc=i=>f.m.l+(f.W-f.m.l-f.m.r)*i/(n-1);
+  series.forEach((s,j)=>{el('polyline',{points:s[1].map((v,i)=>`${xc(i)},${f.y(v)}`).join(' '),fill:'none',stroke:C(PAL[j]),'stroke-width':2,'stroke-linejoin':'round'},f.svg)});
+  const hair=el('line',{y1:f.m.t,y2:f.H-f.m.b,stroke:C('--muted'),'stroke-dasharray':'3 3',visibility:'hidden'},f.svg);
+  const ov=el('rect',{x:f.m.l,y:f.m.t,width:f.W-f.m.l-f.m.r,height:f.H-f.m.t-f.m.b,fill:'transparent'},f.svg);
+  const move=ev=>{const r=f.svg.getBoundingClientRect();const px=(ev.clientX-r.left)*f.W/r.width;const i=Math.max(0,Math.min(n-1,Math.round((px-f.m.l)/((f.W-f.m.l-f.m.r)/(n-1)))));hair.setAttribute('x1',xc(i));hair.setAttribute('x2',xc(i));hair.setAttribute('visibility','visible');f.show(ev,`<b>${xs[i]}</b><br>`+series.map((s,j)=>`<span style="color:${C(PAL[j])}">■</span> ${s[0]}: ${s[1][i].toLocaleString()}`).join('<br>'))};
+  ov.addEventListener('mousemove',move);ov.addEventListener('touchmove',e=>move(e.touches[0]),{passive:true});
+  ov.addEventListener('mouseleave',()=>{f.hide();hair.setAttribute('visibility','hidden')});
+  const every=Math.ceil(n/6);xlabels(f,xs.map((t,i)=>i%every===0||i===n-1?t:''),xc,false);
+}
+function draw(){
+  bars('c-china',D.china.x,[['비축 매입(+)/인출(−)',D.china.y]],{sign:true,rot:true,h:300});
+  lines('c-brent',D.brent.x,[['Brent 월말',D.brent.y]],{h:260});
+  bars('c-rel',D.rel.x,D.rel.s,{h:300});
+  bars('c-speed',D.speed.x,[['하한',D.speed.lo],['상한',D.speed.hi]],{h:280});
+  lines('c-tl',D.tl.x,D.tl.s,{h:300});
+}
+draw();matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+</script>
+</body>
+</html>

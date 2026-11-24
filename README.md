@@ -10,6 +10,7 @@
 
 ## 파일 구성
 
+0. [index.html](index.html): 본문과 그래프 5개를 한 페이지로 보는 HTML (GitHub Pages 주소: https://gyucheol.github.io/newnew/ , Pages 활성화 필요). `python3 tools/build_html.py`로 다시 만듭니다.
 1. [report.md](report.md): 전체 분석 본문 (결론 → 근거 → 반대 의견 → 시사점)
 2. [data/china_implied_stockbuild.csv](data/china_implied_stockbuild.csv): 중국 원유 비축 매입 추정치, 2025년 1월~2026년 10월 (Reuters Clyde Russell 계산)
 3. [data/brent_month_end.csv](data/brent_month_end.csv): Brent 월말 가격, 2025년 1월~2026년 11월 23일 (FMP)
