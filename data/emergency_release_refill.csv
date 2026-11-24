@@ -1,0 +1,8 @@
+country,released_mb,refill_to_prewar_mb,priority_refill_mb,refill_kbd_low,refill_kbd_high,note
+US SPR,172,172,216,440,672,contract returns 216 mb incl 44 mb premium from early 2027 to Sep 2028
+Europe,122,122,122,170,330,restore deadline not found; 12-24 month assumption
+Japan national,90,90,16,120,200,90-day IEA target needs ~16 mb by Mar 2027 (deductive)
+Korea,22.5,22.5,22.5,7,120,swap repayment ~120 kb/d to Dec 2026; 2027 budget ~7-8 kb/d
+IEA total,420,420,464,506,664,349 mb released + 71 mb to end-Feb 2027; Kpler restock demand
+World observed stocks gap,462,462,462,,,incl commercial; end-Oct 2026
+China (not IEA),45-73,0,0,400,1100,discretionary; 2025 pace
